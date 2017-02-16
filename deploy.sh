@@ -11,11 +11,11 @@ configure_aws_cli(){
 
 deploy_cluster() {
 
-    family="sample-webapp-task-family"
+    family="ecscompose-Demo"
 
     make_task_def
     register_definition
-    if [[ $(aws ecs update-service --cluster sample-webapp-cluster --service sample-webapp-service --task-definition $revision | \
+    if [[ $(aws ecs update-service --cluster DemoStack --service sample-webapp-service --task-definition $revision | \
                    $JQ '.service.taskDefinition') != $revision ]]; then
         echo "Error updating service."
         return 1
@@ -24,7 +24,7 @@ deploy_cluster() {
     # wait for older revisions to disappear
     # not really necessary, but nice for demos
     for attempt in {1..30}; do
-        if stale=$(aws ecs describe-services --cluster sample-webapp-cluster --services sample-webapp-service | \
+        if stale=$(aws ecs describe-services --cluster DemoStack --services sample-webapp-service | \
                        $JQ ".services[0].deployments | .[] | select(.taskDefinition != \"$revision\") | .taskDefinition"); then
             echo "Waiting for stale deployments:"
             echo "$stale"
